@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Welcome to r2 adds a basic set of objects, additional help and autocomplete")
+	fmt.Println("Welcome to rw2 adds a basic set of objects, additional help and autocomplete")
 	fmt.Println("use .exit to quit the repl, .help to list the dot commands")
 	vm := otto.New()
 	js := ostdlib.New(vm)
