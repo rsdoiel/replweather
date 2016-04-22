@@ -1,12 +1,12 @@
 package replweather
 
 import (
-	"bytes"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -26,11 +26,11 @@ type Channel struct {
 }
 
 type Item struct {
-	Title       string    `xml:"title"`
-	Link        string    `xml:"link"`
-	GUID        string    `xml:"guid"`
-	Description string    `xml:"description,omitempty"`
-	PubDate     time.Time `xml:"pubdate"`
+	Title       string `xml:"title"`
+	Link        string `xml:"link"`
+	GUID        string `xml:"guid"`
+	Description string `xml:"description"`
+	PubDate     string `xml:"pubDate"`
 }
 
 type Forcast struct {
@@ -40,31 +40,32 @@ type Forcast struct {
 }
 
 func (forcast *Forcast) ToString() string {
-	return fmt.Sprintf(`{"summary": %q, "link": %q, "date": %q}`, forcast.Summary, forcast.Link, forcast.Date)
+	return fmt.Sprintf(`{"summary": %q, "url": %q, "date": %q}`, forcast.Summary, forcast.Link, forcast.Date)
 }
 
-func toUtf8(iso8859_1_buf []byte) []byte {
-	buf := make([]rune, len(iso8859_1_buf))
-	for i, b := range iso8859_1_buf {
+func rssToUtf8(AsIso8859_1 []byte) []byte {
+	buf := make([]rune, len(AsIso8859_1))
+	for i, b := range AsIso8859_1 {
 		buf[i] = rune(b)
 	}
-	return []byte(string(buf))
+	return []byte(strings.Replace(string(buf), `encoding="ISO-8859-1"`, `encoding="UTF-8"`, 1))
 }
 
-func itemToForcast(item *Item) *Forcast {
+func nwsItemToForcast(item *Item) *Forcast {
 	forcast := new(Forcast)
 	forcast.Summary = item.Title
 	forcast.Link = item.Link
-	forcast.Date = item.PubDate
+	if d, err := time.Parse(`Mon, 2 Jan 2006 15:04:05 -0700`, item.PubDate); err == nil {
+		forcast.Date = d
+	}
 	return forcast
 }
 
 func GetNWSRSS() ([]*Forcast, error) {
 	var (
-		forcasts []*Forcast
 		feed     RSS
+		forcasts []*Forcast
 	)
-
 	res, err := http.Get(NWSRSS)
 	if err != nil {
 		return nil, err
@@ -73,16 +74,19 @@ func GetNWSRSS() ([]*Forcast, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Convert to UTF-8
-	asText := bytes.Replace(toUtf8(buf), []byte(`encoding="ISO-8859-1"`), []byte(`encoding="UTF-8"`), 1)
+	//fmt.Printf("DEBUG rss raw: %s\n", buf)
 
-	err = xml.Unmarshal(asText, &feed)
+	// Convert to UTF-8 and unmarshal
+	err = xml.Unmarshal(rssToUtf8(buf), &feed)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	for _, item := range feed.Channel.Items {
-		forcasts = append(forcasts, itemToForcast(item))
+		forcasts = append(forcasts, nwsItemToForcast(item))
 	}
+	// if src, err := json.Marshal(forcasts); err == nil {
+	// 	fmt.Printf("DEBUG %s\n", src)
+	// }
 	return forcasts, nil
 }
