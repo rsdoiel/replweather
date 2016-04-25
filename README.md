@@ -5,6 +5,7 @@ This is a demo program showing how to use otto, ostdlib and weather.gov's NWS RS
 
 ## Additional Resources
 
++ If you are new to go start at the Golang Wiki in [learn](https://github.com/golang/go/wiki/Learn)
 + [weather.gov NWS RSS Feed](/http://www.weather.gov/rss_page.php?site_name=nws)
 + [weather.gov REST API](http://graphical.weather.gov/xml/rest.php)
 + [ostdlib](https://github.com/caltechlibrary/ostdlib)
