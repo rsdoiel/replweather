@@ -1,4 +1,8 @@
 
+[![Go Report Card](http://goreportcard.com/badge/rsdoiel/replweather)](http://goreportcard.com/report/rsdoiel/replweather)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+
+
 # replweather
 
 This is a demo program showing how to use otto, ostdlib and weather.gov's NWS RSS Feed. Goes with the tutorial [developing-with-go-and-a-js-repl](https://github.com/rsdoiel/developing-with-go-and-a-js-repl)
